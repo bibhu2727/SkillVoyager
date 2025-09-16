@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { Heart, Shield, Users } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
@@ -43,11 +44,46 @@ export function AppFooter() {
           <div className="space-y-4">
             <h3 className="font-semibold text-sm text-foreground">Support</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="hover:text-foreground transition-colors cursor-pointer">Help Center</li>
-              <li className="hover:text-foreground transition-colors cursor-pointer">Privacy Policy</li>
-              <li className="hover:text-foreground transition-colors cursor-pointer">Terms of Service</li>
-              <li className="hover:text-foreground transition-colors cursor-pointer">Contact Us</li>
-              <li className="hover:text-foreground transition-colors cursor-pointer">Feedback</li>
+              <li>
+                <Link 
+                  href="/help-center" 
+                  className="hover:text-foreground transition-colors cursor-pointer block"
+                >
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/privacy-policy" 
+                  className="hover:text-foreground transition-colors cursor-pointer block"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/terms-of-service" 
+                  className="hover:text-foreground transition-colors cursor-pointer block"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/contact" 
+                  className="hover:text-foreground transition-colors cursor-pointer block"
+                >
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/feedback" 
+                  className="hover:text-foreground transition-colors cursor-pointer block"
+                >
+                  Feedback
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
