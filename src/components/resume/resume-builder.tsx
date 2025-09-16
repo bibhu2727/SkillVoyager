@@ -55,7 +55,7 @@ export function ResumeBuilder() {
     } else {
       toast({
         title: "Error",
-        description: response.error,
+        description: response.success === false ? response.error : 'An unknown error occurred',
         variant: "destructive",
       });
     }

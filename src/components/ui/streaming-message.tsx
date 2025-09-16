@@ -37,7 +37,7 @@ export const StreamingMessage = memo<StreamingMessageProps>(({
 
   // Memoize formatted content to prevent unnecessary re-renders
   const formattedContent = useMemo(() => {
-    if (!message.content) return '';
+    if (!message.content) return [];
     
     // Split content into paragraphs for better rendering
     return message.content.split('\n').filter(Boolean);

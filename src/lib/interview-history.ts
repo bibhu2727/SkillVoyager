@@ -159,7 +159,7 @@ export class InterviewHistoryManager {
       jobRole: session.jobRole,
       difficulty: session.difficulty,
       completedAt: session.completedAt || new Date(),
-      duration: session.duration,
+      duration: session.duration || 0,
       overallScore: session.aiAnalysis?.overallScore || 0,
       aiAnalysis: session.aiAnalysis!,
       questionsAnswered: session.responses.length,

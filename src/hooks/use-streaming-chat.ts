@@ -315,7 +315,7 @@ export function useStreamingChat(): UseStreamingChatReturn {
       setMessages(prev => [...prev, assistantMessage]);
 
       let buffer = '';
-      let completeResponse = { content: '', suggestions: [], actionItems: [], mood: '', confidence: 0 };
+      let completeResponse = { content: '', suggestions: [] as string[], actionItems: [] as string[], mood: '', confidence: 0 };
       
       while (true) {
         const { done, value } = await reader.read();
@@ -361,13 +361,13 @@ export function useStreamingChat(): UseStreamingChatReturn {
 
                 case 'suggestions':
                   if (chunk.suggestions) {
-                    assistantMessage.suggestions = chunk.suggestions;
-                    completeResponse.suggestions = chunk.suggestions;
+                    assistantMessage.suggestions = chunk.suggestions as string[];
+                    completeResponse.suggestions = (chunk.suggestions as string[]) || [];
                     
                     setMessages(prev => 
                       prev.map(msg => 
                         msg.id === assistantMessage.id 
-                          ? { ...msg, suggestions: chunk.suggestions }
+                          ? { ...msg, suggestions: chunk.suggestions as string[] }
                           : msg
                       )
                     );
@@ -376,13 +376,13 @@ export function useStreamingChat(): UseStreamingChatReturn {
 
                 case 'actionItems':
                   if (chunk.actionItems) {
-                    assistantMessage.actionItems = chunk.actionItems;
-                    completeResponse.actionItems = chunk.actionItems;
+                    assistantMessage.actionItems = chunk.actionItems as string[];
+                    completeResponse.actionItems = chunk.actionItems as string[];
                     
                     setMessages(prev => 
                       prev.map(msg => 
                         msg.id === assistantMessage.id 
-                          ? { ...msg, actionItems: chunk.actionItems }
+                          ? { ...msg, actionItems: chunk.actionItems as string[] }
                           : msg
                       )
                     );
@@ -414,7 +414,7 @@ export function useStreamingChat(): UseStreamingChatReturn {
                   performanceMetrics.totalResponseTime += responseTime;
                   
                   // Update user context for better future predictions
-        updateUserContext(input.message, finalContent);
+                  updateUserContext(message, assistantMessage.content);
 
         // Cache the response for future use
                   cacheResponse(cacheKey, completeResponse);

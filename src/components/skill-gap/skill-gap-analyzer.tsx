@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Loader2, Lightbulb, TrendingUp } from 'lucide-react';
-// Types will be inferred from server action response
+import { SkillGapAnalysisInput, SkillGapAnalysisOutput } from '@/ai/flows/skill-gap-analysis';
 import { analyzeSkillGapAction } from '@/lib/actions';
 import { userProfile } from '@/lib/data';
 
@@ -80,7 +80,7 @@ export function SkillGapAnalyzer() {
     } else {
       toast({
         title: 'Error',
-        description: response.error,
+        description: response.success === false ? response.error : 'An unknown error occurred',
         variant: 'destructive',
       });
     }
@@ -205,7 +205,7 @@ export function SkillGapAnalyzer() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {result.missingSkills.map((skill, index) => (
+            {result.missingSkills.map((skill: { name: string; importance: string }, index: number) => (
               <Card key={index} className="bg-muted/50">
                 <CardHeader>
                   <CardTitle className="flex items-center text-lg">

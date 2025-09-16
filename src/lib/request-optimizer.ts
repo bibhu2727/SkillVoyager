@@ -88,7 +88,7 @@ class RequestOptimizer {
   /**
    * Process batched requests with connection pooling
    */
-  private async processBatch(): void {
+  private async processBatch(): Promise<void> {
     if (this.connectionPool.processing || this.batchQueue.length === 0) {
       return;
     }

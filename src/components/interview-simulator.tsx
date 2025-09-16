@@ -45,7 +45,10 @@ const getSkillsForRole = (jobRole: JobRole): string[] => {
     'Sales Representative': ['lead generation', 'relationship building', 'negotiation', 'CRM systems', 'market analysis'],
     'Business Analyst': ['requirements gathering', 'process mapping', 'data analysis', 'stakeholder communication', 'documentation'],
     'Project Manager': ['project planning', 'risk management', 'team coordination', 'budget management', 'agile methodologies'],
-    'HR Specialist': ['talent acquisition', 'employee relations', 'performance management', 'compliance', 'organizational development']
+    'HR Specialist': ['talent acquisition', 'employee relations', 'performance management', 'compliance', 'organizational development'],
+    'Frontend Developer': ['HTML/CSS', 'JavaScript/TypeScript', 'React/Vue/Angular', 'responsive design', 'browser compatibility', 'performance optimization'],
+    'Backend Developer': ['server architecture', 'database design', 'API development', 'security', 'scalability', 'microservices'],
+    'Full Stack Developer': ['frontend frameworks', 'backend development', 'database management', 'API integration', 'deployment', 'full system architecture']
   };
   return skillsMap[jobRole] || ['communication', 'problem-solving', 'teamwork', 'adaptability'];
 };
@@ -61,7 +64,10 @@ const getIndustryContext = (jobRole: JobRole): string => {
     'Sales Representative': 'Sales/Business Development',
     'Business Analyst': 'Business/Consulting',
     'Project Manager': 'Project Management/Operations',
-    'HR Specialist': 'Human Resources/People Operations'
+    'HR Specialist': 'Human Resources/People Operations',
+    'Frontend Developer': 'Technology/Frontend Development',
+    'Backend Developer': 'Technology/Backend Development',
+    'Full Stack Developer': 'Technology/Full Stack Development'
   };
   return contextMap[jobRole] || 'General Business';
 };
@@ -74,6 +80,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'se_entry_fallback_001',
           category: 'technical-deep-dive',
+          question: 'Describe your experience with programming languages and which one you prefer for different types of projects.',
           text: 'Describe your experience with programming languages and which one you prefer for different types of projects.',
           expectedKeywords: ['programming languages', 'project types', 'experience', 'preferences'],
           timeLimit: 180,
@@ -85,6 +92,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'se_entry_fallback_002',
           category: 'problem-solving',
+          question: 'Walk me through how you would debug a program that is not working as expected.',
           text: 'Walk me through how you would debug a program that is not working as expected.',
           expectedKeywords: ['debugging', 'systematic approach', 'tools', 'testing'],
           timeLimit: 240,
@@ -98,6 +106,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'se_mid_fallback_001',
           category: 'technical-deep-dive',
+          question: 'Explain the trade-offs between different architectural patterns you have used in your projects.',
           text: 'Explain the trade-offs between different architectural patterns you have used in your projects.',
           expectedKeywords: ['architecture', 'trade-offs', 'scalability', 'maintainability'],
           timeLimit: 300,
@@ -111,6 +120,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'se_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you approach technical decision-making when leading a development team?',
           text: 'How do you approach technical decision-making when leading a development team?',
           expectedKeywords: ['leadership', 'technical decisions', 'team collaboration', 'strategy'],
           timeLimit: 360,
@@ -126,6 +136,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ds_entry_fallback_001',
           category: 'technical-deep-dive',
+          question: 'Explain the difference between supervised and unsupervised learning with examples.',
           text: 'Explain the difference between supervised and unsupervised learning with examples.',
           expectedKeywords: ['supervised', 'unsupervised', 'machine learning', 'examples'],
           timeLimit: 180,
@@ -139,6 +150,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ds_mid_fallback_001',
           category: 'problem-solving',
+          question: 'How would you handle missing data in a dataset for a machine learning project?',
           text: 'How would you handle missing data in a dataset for a machine learning project?',
           expectedKeywords: ['missing data', 'data cleaning', 'imputation', 'strategies'],
           timeLimit: 240,
@@ -152,6 +164,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ds_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you communicate complex data science findings to non-technical stakeholders?',
           text: 'How do you communicate complex data science findings to non-technical stakeholders?',
           expectedKeywords: ['communication', 'stakeholders', 'data visualization', 'storytelling'],
           timeLimit: 300,
@@ -167,6 +180,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'pm_entry_fallback_001',
           category: 'problem-solving',
+          question: 'How would you prioritize features for a new product release?',
           text: 'How would you prioritize features for a new product release?',
           expectedKeywords: ['prioritization', 'features', 'user needs', 'business value'],
           timeLimit: 240,
@@ -180,6 +194,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'pm_mid_fallback_001',
           category: 'situational-judgment',
+          question: 'Describe a time when you had to make a difficult product decision with limited data.',
           text: 'Describe a time when you had to make a difficult product decision with limited data.',
           expectedKeywords: ['decision making', 'limited data', 'uncertainty', 'outcome'],
           timeLimit: 300,
@@ -193,6 +208,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'pm_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you align different stakeholders around a product vision?',
           text: 'How do you align different stakeholders around a product vision?',
           expectedKeywords: ['stakeholder alignment', 'product vision', 'communication', 'consensus'],
           timeLimit: 360,
@@ -208,6 +224,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ux_entry_fallback_001',
           category: 'technical-deep-dive',
+          question: 'Walk me through your design process from research to final design.',
           text: 'Walk me through your design process from research to final design.',
           expectedKeywords: ['design process', 'user research', 'prototyping', 'iteration'],
           timeLimit: 240,
@@ -221,6 +238,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ux_mid_fallback_001',
           category: 'problem-solving',
+          question: 'How would you approach designing for accessibility in a mobile app?',
           text: 'How would you approach designing for accessibility in a mobile app?',
           expectedKeywords: ['accessibility', 'mobile design', 'inclusive design', 'guidelines'],
           timeLimit: 300,
@@ -234,6 +252,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ux_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you advocate for user-centered design in an organization focused on business metrics?',
           text: 'How do you advocate for user-centered design in an organization focused on business metrics?',
           expectedKeywords: ['user advocacy', 'business alignment', 'metrics', 'influence'],
           timeLimit: 360,
@@ -249,6 +268,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'devops_entry_fallback_001',
           category: 'technical-deep-dive',
+          question: 'Explain the concept of CI/CD and its benefits.',
           text: 'Explain the concept of CI/CD and its benefits.',
           expectedKeywords: ['CI/CD', 'continuous integration', 'continuous deployment', 'automation'],
           timeLimit: 180,
@@ -262,6 +282,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'devops_mid_fallback_001',
           category: 'problem-solving',
+          question: 'How would you handle a production outage in a microservices architecture?',
           text: 'How would you handle a production outage in a microservices architecture?',
           expectedKeywords: ['incident response', 'microservices', 'troubleshooting', 'monitoring'],
           timeLimit: 300,
@@ -275,6 +296,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'devops_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you drive DevOps culture adoption across development teams?',
           text: 'How do you drive DevOps culture adoption across development teams?',
           expectedKeywords: ['culture change', 'team collaboration', 'DevOps practices', 'leadership'],
           timeLimit: 360,
@@ -290,6 +312,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'mm_entry_fallback_001',
           category: 'problem-solving',
+          question: 'How would you measure the success of a marketing campaign?',
           text: 'How would you measure the success of a marketing campaign?',
           expectedKeywords: ['metrics', 'KPIs', 'campaign measurement', 'ROI'],
           timeLimit: 180,
@@ -303,6 +326,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'mm_mid_fallback_001',
           category: 'situational-judgment',
+          question: 'Describe a time when a marketing campaign did not perform as expected. How did you handle it?',
           text: 'Describe a time when a marketing campaign did not perform as expected. How did you handle it?',
           expectedKeywords: ['campaign optimization', 'problem solving', 'data analysis', 'pivot'],
           timeLimit: 300,
@@ -316,6 +340,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'mm_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you develop and execute a comprehensive marketing strategy?',
           text: 'How do you develop and execute a comprehensive marketing strategy?',
           expectedKeywords: ['marketing strategy', 'market research', 'competitive analysis', 'execution'],
           timeLimit: 360,
@@ -331,6 +356,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'sr_entry_fallback_001',
           category: 'communication',
+          question: 'How do you build rapport with a new potential client?',
           text: 'How do you build rapport with a new potential client?',
           expectedKeywords: ['relationship building', 'rapport', 'client engagement', 'trust'],
           timeLimit: 180,
@@ -344,6 +370,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'sr_mid_fallback_001',
           category: 'problem-solving',
+          question: 'Describe a time when you had to overcome significant objections to close a deal.',
           text: 'Describe a time when you had to overcome significant objections to close a deal.',
           expectedKeywords: ['objection handling', 'negotiation', 'persistence', 'solution'],
           timeLimit: 300,
@@ -357,6 +384,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'sr_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you mentor junior sales team members to improve their performance?',
           text: 'How do you mentor junior sales team members to improve their performance?',
           expectedKeywords: ['mentoring', 'team development', 'sales coaching', 'performance improvement'],
           timeLimit: 360,
@@ -372,6 +400,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ba_entry_fallback_001',
           category: 'technical-deep-dive',
+          question: 'How do you gather and document business requirements?',
           text: 'How do you gather and document business requirements?',
           expectedKeywords: ['requirements gathering', 'stakeholder interviews', 'documentation', 'analysis'],
           timeLimit: 240,
@@ -385,6 +414,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ba_mid_fallback_001',
           category: 'problem-solving',
+          question: 'Describe a time when you had to analyze conflicting requirements from different stakeholders.',
           text: 'Describe a time when you had to analyze conflicting requirements from different stakeholders.',
           expectedKeywords: ['conflict resolution', 'stakeholder management', 'requirements analysis', 'compromise'],
           timeLimit: 300,
@@ -398,6 +428,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'ba_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you drive business process improvements across an organization?',
           text: 'How do you drive business process improvements across an organization?',
           expectedKeywords: ['process improvement', 'change management', 'stakeholder buy-in', 'implementation'],
           timeLimit: 360,
@@ -413,6 +444,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'pm_entry_fallback_001',
           category: 'problem-solving',
+          question: 'How do you handle project scope creep?',
           text: 'How do you handle project scope creep?',
           expectedKeywords: ['scope management', 'change control', 'stakeholder communication', 'documentation'],
           timeLimit: 240,
@@ -426,6 +458,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'pm_mid_fallback_001',
           category: 'situational-judgment',
+          question: 'Describe a project that was falling behind schedule. How did you get it back on track?',
           text: 'Describe a project that was falling behind schedule. How did you get it back on track?',
           expectedKeywords: ['schedule recovery', 'risk management', 'resource allocation', 'problem solving'],
           timeLimit: 300,
@@ -439,6 +472,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'pm_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you manage a project with multiple stakeholders who have competing priorities?',
           text: 'How do you manage a project with multiple stakeholders who have competing priorities?',
           expectedKeywords: ['stakeholder management', 'priority alignment', 'negotiation', 'communication'],
           timeLimit: 360,
@@ -454,6 +488,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'hr_entry_fallback_001',
           category: 'communication',
+          question: 'How do you handle a difficult conversation with an employee about performance issues?',
           text: 'How do you handle a difficult conversation with an employee about performance issues?',
           expectedKeywords: ['performance management', 'difficult conversations', 'employee relations', 'feedback'],
           timeLimit: 240,
@@ -467,6 +502,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'hr_mid_fallback_001',
           category: 'problem-solving',
+          question: 'Describe a time when you had to mediate a conflict between team members.',
           text: 'Describe a time when you had to mediate a conflict between team members.',
           expectedKeywords: ['conflict resolution', 'mediation', 'team dynamics', 'solution'],
           timeLimit: 300,
@@ -480,6 +516,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
         {
           id: 'hr_senior_fallback_001',
           category: 'leadership-influence',
+          question: 'How do you develop and implement HR policies that support organizational culture?',
           text: 'How do you develop and implement HR policies that support organizational culture?',
           expectedKeywords: ['policy development', 'organizational culture', 'change management', 'implementation'],
           timeLimit: 360,
@@ -487,6 +524,138 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
           complexity: 'deep-dive',
           difficulty: 'senior',
           tips: 'Connect HR strategy to business objectives.'
+        }
+      ]
+    },
+    'Frontend Developer': {
+      'entry': [
+        {
+          id: 'fd_entry_fallback_001',
+          category: 'technical-deep-dive',
+          question: 'Explain the difference between HTML, CSS, and JavaScript and their roles in web development.',
+          text: 'Explain the difference between HTML, CSS, and JavaScript and their roles in web development.',
+          expectedKeywords: ['HTML', 'CSS', 'JavaScript', 'web development', 'frontend'],
+          timeLimit: 180,
+          questionType: 'open-ended',
+          complexity: 'quick-response',
+          difficulty: 'entry',
+          tips: 'Focus on the fundamental concepts and their interactions.'
+        }
+      ],
+      'mid': [
+        {
+          id: 'fd_mid_fallback_001',
+          category: 'problem-solving',
+          question: 'How would you optimize the performance of a React application?',
+          text: 'How would you optimize the performance of a React application?',
+          expectedKeywords: ['React optimization', 'performance', 'memoization', 'lazy loading', 'bundle size'],
+          timeLimit: 300,
+          questionType: 'scenario-based',
+          complexity: 'detailed-analysis',
+          difficulty: 'mid',
+          tips: 'Discuss specific optimization techniques and tools.'
+        }
+      ],
+      'senior': [
+        {
+          id: 'fd_senior_fallback_001',
+          category: 'leadership-influence',
+          question: 'How do you establish and maintain frontend architecture standards across a development team?',
+          text: 'How do you establish and maintain frontend architecture standards across a development team?',
+          expectedKeywords: ['architecture standards', 'team leadership', 'code quality', 'best practices'],
+          timeLimit: 360,
+          questionType: 'experience-based',
+          complexity: 'deep-dive',
+          difficulty: 'senior',
+          tips: 'Focus on leadership and architectural decision-making.'
+        }
+      ]
+    },
+    'Backend Developer': {
+      'entry': [
+        {
+          id: 'bd_entry_fallback_001',
+          category: 'technical-deep-dive',
+          question: 'Explain the concept of RESTful APIs and their key principles.',
+          text: 'Explain the concept of RESTful APIs and their key principles.',
+          expectedKeywords: ['REST', 'API', 'HTTP methods', 'stateless', 'resources'],
+          timeLimit: 240,
+          questionType: 'open-ended',
+          complexity: 'detailed-analysis',
+          difficulty: 'entry',
+          tips: 'Cover the fundamental REST principles and HTTP methods.'
+        }
+      ],
+      'mid': [
+        {
+          id: 'bd_mid_fallback_001',
+          category: 'problem-solving',
+          question: 'How would you design a database schema for a scalable e-commerce application?',
+          text: 'How would you design a database schema for a scalable e-commerce application?',
+          expectedKeywords: ['database design', 'scalability', 'normalization', 'indexing', 'relationships'],
+          timeLimit: 300,
+          questionType: 'scenario-based',
+          complexity: 'detailed-analysis',
+          difficulty: 'mid',
+          tips: 'Consider scalability, performance, and data integrity.'
+        }
+      ],
+      'senior': [
+        {
+          id: 'bd_senior_fallback_001',
+          category: 'leadership-influence',
+          question: 'How do you architect microservices for a large-scale distributed system?',
+          text: 'How do you architect microservices for a large-scale distributed system?',
+          expectedKeywords: ['microservices', 'distributed systems', 'service communication', 'scalability', 'fault tolerance'],
+          timeLimit: 360,
+          questionType: 'experience-based',
+          complexity: 'deep-dive',
+          difficulty: 'senior',
+          tips: 'Discuss service boundaries, communication patterns, and resilience.'
+        }
+      ]
+    },
+    'Full Stack Developer': {
+      'entry': [
+        {
+          id: 'fsd_entry_fallback_001',
+          category: 'technical-deep-dive',
+          question: 'Describe the flow of data from a user interface to a database and back.',
+          text: 'Describe the flow of data from a user interface to a database and back.',
+          expectedKeywords: ['data flow', 'frontend', 'backend', 'database', 'API'],
+          timeLimit: 240,
+          questionType: 'open-ended',
+          complexity: 'detailed-analysis',
+          difficulty: 'entry',
+          tips: 'Explain the complete request-response cycle.'
+        }
+      ],
+      'mid': [
+        {
+          id: 'fsd_mid_fallback_001',
+          category: 'problem-solving',
+          question: 'How would you implement user authentication and authorization in a full-stack application?',
+          text: 'How would you implement user authentication and authorization in a full-stack application?',
+          expectedKeywords: ['authentication', 'authorization', 'JWT', 'security', 'session management'],
+          timeLimit: 300,
+          questionType: 'scenario-based',
+          complexity: 'detailed-analysis',
+          difficulty: 'mid',
+          tips: 'Cover both frontend and backend security considerations.'
+        }
+      ],
+      'senior': [
+        {
+          id: 'fsd_senior_fallback_001',
+          category: 'leadership-influence',
+          question: 'How do you make technology stack decisions for a new full-stack project?',
+          text: 'How do you make technology stack decisions for a new full-stack project?',
+          expectedKeywords: ['technology selection', 'architecture decisions', 'trade-offs', 'team capabilities', 'project requirements'],
+          timeLimit: 360,
+          questionType: 'experience-based',
+          complexity: 'deep-dive',
+          difficulty: 'senior',
+          tips: 'Discuss evaluation criteria and decision-making process.'
         }
       ]
     }
@@ -497,6 +666,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
     {
       id: `${jobRole.toLowerCase().replace(' ', '_')}_${difficulty}_generic_001`,
       category: 'behavioral-stories',
+      question: `Tell me about a challenging project you worked on in your ${jobRole} role.`,
       text: `Tell me about a challenging project you worked on in your ${jobRole} role.`,
       expectedKeywords: ['challenge', 'project', 'problem-solving', 'outcome'],
       timeLimit: 240,
@@ -508,6 +678,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
     {
       id: `${jobRole.toLowerCase().replace(' ', '_')}_${difficulty}_generic_002`,
       category: 'communication',
+      question: 'How do you handle disagreements or conflicts in a team setting?',
       text: 'How do you handle disagreements or conflicts in a team setting?',
       expectedKeywords: ['conflict resolution', 'communication', 'teamwork', 'collaboration'],
       timeLimit: 180,
@@ -519,6 +690,7 @@ const getFallbackQuestions = (jobRole: JobRole, difficulty: DifficultyLevel): In
     {
       id: `${jobRole.toLowerCase().replace(' ', '_')}_${difficulty}_generic_003`,
       category: 'culture-fit',
+      question: 'What motivates you in your work and how do you stay engaged?',
       text: 'What motivates you in your work and how do you stay engaged?',
       expectedKeywords: ['motivation', 'engagement', 'values', 'career goals'],
       timeLimit: 180,
@@ -561,7 +733,7 @@ const getQuestionTypeIcon = (type: string): string => {
 interface InterviewSimulatorProps {
   jobRole: JobRole;
   difficulty: DifficultyLevel;
-  duration?: number;
+  duration?: 15 | 30 | 45;
   onComplete?: (session: InterviewSession) => void;
   className?: string;
 }

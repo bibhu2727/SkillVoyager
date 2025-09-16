@@ -135,10 +135,16 @@ export function SidebarNav() {
       <SidebarSeparator />
       <SidebarFooter>
         <div className="flex items-center gap-3 px-2 py-1.5">
-          <Avatar className="size-8 cursor-pointer" onClick={() => document.getElementById('avatar-upload')?.click()}>
-            <AvatarImage src={displayAvatar} alt="User avatar" />
-            <AvatarFallback>{displayName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-          </Avatar>
+          <SidebarMenuButton size="sm" variant="default" asChild>
+            <label htmlFor="avatar-upload" className="cursor-pointer">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={displayAvatar || undefined} alt={displayName} />
+                <AvatarFallback className="text-xs">
+                  {displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </label>
+          </SidebarMenuButton>
           <input
              id="avatar-upload"
              type="file"
@@ -154,26 +160,14 @@ export function SidebarNav() {
           </div>
           <div className="flex gap-1">
             <SimpleThemeToggle />
-            <SidebarMenuButton
-              asChild
-              size="icon"
-              variant="ghost"
-              className="size-8"
-              tooltip={{ children: 'Profile Settings', side: 'right' }}
-            >
+            <SidebarMenuButton size="sm" variant="default" asChild>
               <Link href="/profile">
-                <User />
+                <User className="h-4 w-4" />
               </Link>
             </SidebarMenuButton>
             {user && (
-              <SidebarMenuButton
-                size="icon"
-                variant="ghost"
-                className="size-8"
-                tooltip={{ children: 'Sign Out', side: 'right' }}
-                onClick={logout}
-              >
-                <LogOut />
+              <SidebarMenuButton size="sm" variant="default" onClick={logout}>
+                <LogOut className="h-4 w-4" />
               </SidebarMenuButton>
             )}
           </div>

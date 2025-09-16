@@ -53,7 +53,7 @@ export function LazyInterviewSimulator({
       <InterviewSimulator 
         jobRole={jobRole}
         difficulty={difficulty}
-        duration={duration}
+        duration={duration as 15 | 30 | 45}
         onComplete={onComplete}
       />
     </Suspense>

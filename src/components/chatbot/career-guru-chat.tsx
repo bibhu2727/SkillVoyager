@@ -1,14 +1,13 @@
 'use client';
 
 import { useRef, useEffect, memo, useMemo, useState } from 'react';
-import { Send, Bot, User, Sparkles, MessageCircle, Lightbulb, ArrowUp, Zap, RotateCcw, Settings } from 'lucide-react';
+import { Send, Bot, User, MessageCircle, Lightbulb, ArrowUp, Zap, RotateCcw, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { useStreamingChat } from '@/hooks/use-streaming-chat';
 import { PerformanceMonitor } from '@/components/ui/performance-monitor';
 import { TypingIndicator } from '@/components/ui/typing-indicator';
@@ -75,7 +74,7 @@ const MessageBubble = memo(({ message, onSuggestionClick }: {
           
           {message.mood && message.role === 'assistant' && (
             <div className="mt-2 flex items-center gap-2">
-              <Badge className={cn("text-xs", MOOD_COLORS[message.mood])}>
+              <Badge className={cn("text-xs", MOOD_COLORS[message.mood as keyof typeof MOOD_COLORS] || MOOD_COLORS.friendly)}>
                 {message.mood}
               </Badge>
               {message.confidence && (
@@ -100,7 +99,7 @@ const MessageBubble = memo(({ message, onSuggestionClick }: {
           <CardContent className="pt-0">
             <ul className="space-y-1">
               {message.actionItems.map((item: string, index: number) => (
-                <li key={index} className="text-sm text-amber-700 dark:text-amber-300 flex items-start gap-2">
+                <li key={`action-${message.id}-${index}`} className="text-sm text-amber-700 dark:text-amber-300 flex items-start gap-2">
                   <ArrowUp className="h-3 w-3 mt-0.5 flex-shrink-0" />
                   {item}
                 </li>
@@ -115,7 +114,7 @@ const MessageBubble = memo(({ message, onSuggestionClick }: {
         <div className="flex flex-wrap gap-2">
           {message.suggestions.map((suggestion: string, index: number) => (
             <Button
-              key={index}
+              key={`suggestion-${message.id}-${index}`}
               variant="outline"
               size="sm"
               className="text-xs h-8 bg-white/80 hover:bg-blue-50 border-blue-200 text-blue-700 transition-colors"
@@ -141,29 +140,7 @@ const MessageBubble = memo(({ message, onSuggestionClick }: {
 
 MessageBubble.displayName = 'MessageBubble';
 
-const TypingIndicator = memo(() => (
-  <div className="flex gap-3 justify-start">
-    <Avatar className="h-8 w-8 mt-1">
-      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-        <Bot className="h-4 w-4" />
-      </AvatarFallback>
-    </Avatar>
-    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm">
-      <CardContent className="p-3">
-        <div className="flex items-center gap-1">
-          <div className="flex space-x-1">
-            <div className="h-2 w-2 bg-blue-500 rounded-full animate-bounce" />
-            <div className="h-2 w-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-            <div className="h-2 w-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-          </div>
-          <div className="text-xs text-gray-800 dark:text-gray-300 ml-2">CareerGuru is thinking...</div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-));
 
-TypingIndicator.displayName = 'TypingIndicator';
 
 export function CareerGuruChat() {
   const {
@@ -201,32 +178,8 @@ export function CareerGuruChat() {
   }, [messages, streamingState.isStreaming]);
 
   useEffect(() => {
-    // Welcome message with performance info
-    if (messages.length === 0) {
-      const welcomeMessage = {
-        id: 'welcome',
-        role: 'assistant' as const,
-        content: `Hey! 👋 I'm CareerGuru, your lightning-fast AI buddy! I'm optimized for speed and can chat about pretty much anything - though I'm especially awesome with career stuff.
-
-**I can help with:**
-• Career advice & planning 🚀
-• Tech questions & coding help 💻
-• Study tips & learning strategies 📚
-• Life advice & problem-solving 💡
-• Creative projects & brainstorming 🎨
-• Industry insights & trends 📈
-• And honestly, whatever else you need!
-
-⚡ **Super fast responses** - I'm built for speed with smart caching and streaming!
-
-No overthinking, just quick and helpful responses. What's up?`,
-        timestamp: new Date().toISOString(),
-        suggestions: STARTER_QUESTIONS.slice(0, 3),
-        mood: 'friendly' as const,
-        confidence: 0.95
-      };
-      // This will be handled by the hook's initialization
-    }
+    // Welcome message initialization is handled by the hook
+    // No additional setup needed here
   }, [messages.length]);
 
   const handleSendMessage = async (message?: string) => {
@@ -242,7 +195,7 @@ No overthinking, just quick and helpful responses. What's up?`,
     }, 100);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -338,7 +291,7 @@ No overthinking, just quick and helpful responses. What's up?`,
               isVisible={true}
               stage={streamingState.connectionStatus === 'connecting' ? 'thinking' : 'streaming'}
               cacheHit={streamingState.cacheHit}
-              optimizationLevel={streamingState.optimizationLevel}
+              optimizationLevel={streamingState.optimizationLevel === 'fast' ? 'fast' : streamingState.optimizationLevel === 'normal' ? 'balanced' : 'maximum'}
             />
           )}
 
@@ -376,7 +329,7 @@ No overthinking, just quick and helpful responses. What's up?`,
               ref={inputRef}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder={streamingState.isStreaming ? "Streaming response..." : "Ask CareerGuru anything..."}
               disabled={isLoading || streamingState.isStreaming}
               className="flex-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
@@ -410,7 +363,7 @@ No overthinking, just quick and helpful responses. What's up?`,
               <div className="flex flex-wrap gap-2">
                 {STARTER_QUESTIONS.map((question, index) => (
                   <Button
-                    key={index}
+                    key={`starter-${index}-${question.slice(0, 10)}`}
                     variant="outline"
                     size="sm"
                     className="text-xs h-7 bg-white/60 hover:bg-blue-50 border-blue-200 text-blue-700 transition-colors"

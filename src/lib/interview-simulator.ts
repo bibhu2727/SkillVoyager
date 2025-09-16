@@ -12,7 +12,8 @@ export type JobRole =
   | 'DevOps Engineer'
   | 'Frontend Developer'
   | 'Backend Developer'
-  | 'Full Stack Developer';
+  | 'Full Stack Developer'
+  | 'HR Specialist';
 
 export type DifficultyLevel = 'entry' | 'mid' | 'senior';
 
@@ -41,6 +42,8 @@ export interface InterviewQuestion {
   complexity?: 'quick-response' | 'detailed-analysis' | 'deep-dive';
   evaluationCriteria?: string[];
   commonMistakes?: string[];
+  // Additional property for compatibility
+  text?: string;
 }
 
 export interface SpeechAnalysis {
@@ -65,6 +68,11 @@ export interface AIAnalysis {
     problemSolving: number;
     leadership: number;
   };
+  // Additional properties for compatibility
+  feedback?: string;
+  keyStrengths?: string[];
+  contentScore?: number;
+  technicalScore?: number;
 }
 
 export interface InterviewResponse {
@@ -843,6 +851,32 @@ export const INTERVIEW_QUESTIONS: Record<JobRole, Record<DifficultyLevel, Interv
       question: 'How do you architect a full-stack application for scalability?',
       expectedKeywords: ['system design', 'microservices', 'database design', 'performance', 'monitoring'],
       timeLimit: 500,
+      difficulty: 'senior'
+    }]
+  },
+  'HR Specialist': {
+    entry: [{
+      id: 'hr_entry_001',
+      category: 'behavioral-stories',
+      question: 'How do you handle employee conflicts in the workplace?',
+      expectedKeywords: ['mediation', 'communication', 'conflict resolution', 'documentation', 'policy'],
+      timeLimit: 240,
+      difficulty: 'entry'
+    }],
+    mid: [{
+      id: 'hr_mid_001',
+      category: 'situational-judgment',
+      question: 'How would you design an effective recruitment process?',
+      expectedKeywords: ['job analysis', 'sourcing', 'screening', 'interviewing', 'assessment'],
+      timeLimit: 300,
+      difficulty: 'mid'
+    }],
+    senior: [{
+      id: 'hr_senior_001',
+      category: 'leadership-influence',
+      question: 'How do you develop and implement HR strategies aligned with business goals?',
+      expectedKeywords: ['strategic planning', 'organizational development', 'talent management', 'metrics', 'change management'],
+      timeLimit: 400,
       difficulty: 'senior'
     }]
   }

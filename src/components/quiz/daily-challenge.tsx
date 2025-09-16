@@ -5,7 +5,7 @@ import { Calendar, Clock, Trophy, Flame, Star, Gift, TrendingUp } from 'lucide-r
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import {
-  DailyChallenge,
+  type DailyChallenge,
   DailyChallengeResult,
   getTodaysChallenge,
   hasTakenTodaysChallenge,

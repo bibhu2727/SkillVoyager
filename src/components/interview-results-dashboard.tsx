@@ -62,7 +62,7 @@ export function InterviewResultsDashboard({
   // Calculate detailed scores
   const scoreBreakdown = calculateScoreBreakdown(session);
   const improvementAreas = generateImprovementAreas(session);
-  const overallGrade = getOverallGrade(session.overallScore);
+  const overallGrade = getOverallGrade(session.overallScore || 0);
   const strengths = identifyStrengths(session);
   const timeAnalysis = analyzeTimeSpent(session);
 
@@ -74,10 +74,10 @@ export function InterviewResultsDashboard({
           <div className="flex items-center justify-center mb-4">
             <div className={cn(
               'w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white',
-              session.overallScore >= 80 ? 'bg-green-500' :
-              session.overallScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+              (session.overallScore || 0) >= 80 ? 'bg-green-500' :
+              (session.overallScore || 0) >= 60 ? 'bg-yellow-500' : 'bg-red-500'
             )}>
-              {session.overallScore}
+              {session.overallScore || 0}
             </div>
           </div>
           <CardTitle className="text-2xl mb-2">
@@ -102,7 +102,7 @@ export function InterviewResultsDashboard({
             </div>
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              {Math.round(session.responses.reduce((sum, r) => sum + r.timeSpent, 0) / 60)} min
+              {Math.round(session.responses.reduce((sum, r) => sum + (r.timeSpent || 0), 0) / 60)} min
             </div>
           </div>
         </CardHeader>
@@ -192,7 +192,7 @@ export function InterviewResultsDashboard({
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="text-center">
                         <div className="text-muted-foreground">Time</div>
-                        <div className="font-medium">{response.timeSpent}s</div>
+                        <div className="font-medium">{response.timeSpent || 0}s</div>
                       </div>
                       {response.speechAnalysis && (
                         <>
@@ -472,7 +472,7 @@ function generateImprovementAreas(session: InterviewSession): ImprovementArea[] 
 
   // Analyze technical content
   const technicalQuestions = responses.filter(r => 
-    r.aiAnalysis && r.aiAnalysis.technicalScore < 60);
+    r.aiAnalysis && (r.aiAnalysis.technicalScore || 0) < 60);
   
   if (technicalQuestions.length > 0) {
     areas.push({
@@ -520,14 +520,14 @@ function identifyStrengths(session: InterviewSession): string[] {
   }
   
   // Check response timing
-  const avgTime = responses.reduce((sum, r) => sum + r.timeSpent, 0) / responses.length;
+  const avgTime = responses.reduce((sum, r) => sum + (r.timeSpent || 0), 0) / responses.length;
   if (avgTime >= 60 && avgTime <= 180) {
     strengths.push('Well-paced responses');
   }
   
   // Check AI feedback
   const positiveAIFeedback = responses.filter(r => 
-    r.aiAnalysis && r.aiAnalysis.overallScore >= 75);
+    r.aiAnalysis && r.aiAnalysis.overallScore && r.aiAnalysis.overallScore >= 75);
   
   if (positiveAIFeedback.length >= responses.length * 0.6) {
     strengths.push('Strong content and technical knowledge');
@@ -541,7 +541,7 @@ function analyzeTimeSpent(session: InterviewSession): {
   averageTime: string;
   pacing: string;
 } {
-  const totalSeconds = session.responses.reduce((sum, r) => sum + r.timeSpent, 0);
+  const totalSeconds = session.responses.reduce((sum, r) => sum + (r.timeSpent || 0), 0);
   const avgSeconds = totalSeconds / session.responses.length;
   
   const totalMinutes = Math.floor(totalSeconds / 60);
@@ -570,7 +570,7 @@ function calculateResponseScore(response: any): number {
   }
   
   // AI analysis contribution (60%)
-  if (response.aiAnalysis && response.aiAnalysis.overallScore) {
+  if (response.aiAnalysis && response.aiAnalysis.overallScore !== undefined) {
     score = score * 0.4 + response.aiAnalysis.overallScore * 0.6;
   }
   
