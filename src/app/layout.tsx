@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/contexts/auth-context';
 import { ThemeProvider } from '@/contexts/theme-context';
 import { CookieConsentWrapper } from '@/components/ui/cookie-consent-wrapper';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'SkillVoyager',
@@ -31,6 +33,8 @@ export default function RootLayout({
             </AppLayout>
             <Toaster />
             <CookieConsentWrapper />
+            <Analytics />
+            <SpeedInsights />
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -7,10 +7,26 @@
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
+    "build:production": "npm run typecheck && npm run lint && next build",
+    "build:vercel": "next build",
     "start": "next start",
+    "start:production": "next start -p 3000",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "export": "next build && next export",
+    "deploy:vercel": "vercel --prod",
+    "deploy:vercel:preview": "vercel",
+    "deploy:netlify": "netlify deploy --prod",
+    "vercel:env": "vercel env pull .env.local",
+    "vercel:logs": "vercel logs",
+    "vercel:domains": "vercel domains",
+    "test:build": "npm run build && npm run start",
+    "test:vercel": "npm run build:vercel && npm run start",
+    "optimize": "npm run lint:fix && npm run typecheck && npm run build:production",
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
@@ -37,6 +53,8 @@
     "@radix-ui/react-tabs": "^1.1.3",
     "@radix-ui/react-toast": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@vercel/analytics": "^1.4.1",
+    "@vercel/speed-insights": "^1.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -59,12 +77,20 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.3.3",
     "genkit-cli": "^1.14.1",
+    "next-sitemap": "^4.2.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "tsx": "^4.19.2",
+    "typescript": "^5",
+    "vercel": "^25.2.0"
   }
 }
