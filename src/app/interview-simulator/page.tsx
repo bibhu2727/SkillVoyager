@@ -156,9 +156,14 @@ export default function InterviewSimulatorPage() {
       const hasMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
       const hasSpeechRecognition = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
       
-      if (!hasMediaDevices || !hasSpeechRecognition) {
+      if (!hasMediaDevices) {
+        console.error('MediaDevices API not supported');
         setIsPermissionGranted(false);
         return;
+      }
+      
+      if (!hasSpeechRecognition) {
+        console.warn('Speech Recognition not supported, but continuing with video/audio only');
       }
 
       // Test permissions
@@ -168,11 +173,14 @@ export default function InterviewSimulatorPage() {
           audio: true 
         });
         stream.getTracks().forEach(track => track.stop());
+        console.log('Camera and microphone permissions granted');
         setIsPermissionGranted(true);
-      } catch (error) {
+      } catch (error: any) {
+        console.error('Permission denied or device not available:', error.name, error.message);
         setIsPermissionGranted(false);
       }
     } catch (error) {
+      console.error('Browser support check failed:', error);
       setIsPermissionGranted(false);
     }
   };
@@ -430,7 +438,7 @@ ${response.aiAnalysis ? `- AI Feedback: ${response.aiAnalysis.feedback}` : ''}
               </Alert>
 
               {/* Start Button */}
-              <Button 
+              <Button
                 onClick={handleStartInterview}
                 className="w-full h-12 text-lg"
                 disabled={isPermissionGranted === false}
@@ -439,6 +447,42 @@ ${response.aiAnalysis ? `- AI Feedback: ${response.aiAnalysis.feedback}` : ''}
                 Start Interview
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
+              
+              {isPermissionGranted === false && (
+                <Alert className="mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">Camera and microphone access required</p>
+                      <p className="text-sm text-muted-foreground">
+                        To start the interview simulator, please:
+                      </p>
+                      <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
+                        <li>Click the camera/microphone icon in your browser's address bar</li>
+                        <li>Select "Allow" for both camera and microphone permissions</li>
+                        <li>Refresh the page if needed</li>
+                      </ol>
+                      <Button 
+                        onClick={checkBrowserSupport} 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2"
+                      >
+                        Check Permissions Again
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {isPermissionGranted === null && (
+                <Alert className="mt-4">
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Checking browser compatibility and permissions...
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {/* Selected Configuration Summary */}
               <div className="bg-muted p-4 rounded-lg">
