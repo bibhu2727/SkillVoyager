@@ -151,36 +151,97 @@ export default function InterviewSimulatorPage() {
   }, []);
 
   const checkBrowserSupport = async () => {
+    console.log('🔍 Starting browser support check...');
+    console.log('🌐 Environment:', process.env.NODE_ENV);
+    console.log('🔗 Current URL:', window.location.href);
+    console.log('🔒 Is HTTPS:', window.location.protocol === 'https:');
+    setIsPermissionGranted(null); // Set to loading state
+    
     try {
       // Check for required APIs
       const hasMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
       const hasSpeechRecognition = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
       
+      console.log('📱 MediaDevices API supported:', hasMediaDevices);
+      console.log('🎤 Speech Recognition supported:', hasSpeechRecognition);
+      
       if (!hasMediaDevices) {
-        console.error('MediaDevices API not supported');
+        console.error('❌ MediaDevices API not supported');
+        setIsPermissionGranted(false);
+        return;
+      }
+      
+      // Check if we're in a secure context (required for getUserMedia)
+      if (!window.isSecureContext) {
+        console.error('❌ Not in secure context (HTTPS required for camera/microphone)');
         setIsPermissionGranted(false);
         return;
       }
       
       if (!hasSpeechRecognition) {
-        console.warn('Speech Recognition not supported, but continuing with video/audio only');
+        console.warn('⚠️ Speech Recognition not supported, but continuing with video/audio only');
       }
 
-      // Test permissions
+      // Test permissions with more detailed logging
       try {
+        console.log('🔐 Requesting camera and microphone permissions...');
         const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: true 
+          video: { 
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }, 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true
+          }
         });
-        stream.getTracks().forEach(track => track.stop());
-        console.log('Camera and microphone permissions granted');
+        
+        console.log('✅ Stream obtained successfully');
+        console.log('📹 Video tracks:', stream.getVideoTracks().length);
+        console.log('🎵 Audio tracks:', stream.getAudioTracks().length);
+        
+        // Check track states
+        stream.getVideoTracks().forEach((track, index) => {
+          console.log(`📹 Video track ${index}:`, track.label, 'State:', track.readyState);
+        });
+        
+        stream.getAudioTracks().forEach((track, index) => {
+          console.log(`🎵 Audio track ${index}:`, track.label, 'State:', track.readyState);
+        });
+        
+        // Clean up
+        stream.getTracks().forEach(track => {
+          track.stop();
+          console.log('🛑 Stopped track:', track.label);
+        });
+        
+        console.log('🎉 Camera and microphone permissions granted successfully!');
         setIsPermissionGranted(true);
+        
       } catch (error: any) {
-        console.error('Permission denied or device not available:', error.name, error.message);
+        console.error('❌ Permission error details:');
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error constraint:', error.constraint);
+        console.error('Full error:', error);
+        
+        // More specific error handling
+        if (error.name === 'NotAllowedError') {
+          console.error('🚫 User denied permission or permissions were revoked');
+        } else if (error.name === 'NotFoundError') {
+          console.error('📷 No camera or microphone found');
+        } else if (error.name === 'NotReadableError') {
+          console.error('🔒 Device is already in use by another application');
+        } else if (error.name === 'OverconstrainedError') {
+          console.error('⚙️ Constraints cannot be satisfied');
+        } else if (error.name === 'SecurityError') {
+          console.error('🔐 Security error - likely HTTPS required or permissions policy blocked');
+        }
+        
         setIsPermissionGranted(false);
       }
     } catch (error) {
-      console.error('Browser support check failed:', error);
+      console.error('💥 Browser support check failed:', error);
       setIsPermissionGranted(false);
     }
   };
@@ -462,14 +523,26 @@ ${response.aiAnalysis ? `- AI Feedback: ${response.aiAnalysis.feedback}` : ''}
                         <li>Select "Allow" for both camera and microphone permissions</li>
                         <li>Refresh the page if needed</li>
                       </ol>
-                      <Button 
-                        onClick={checkBrowserSupport} 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2"
-                      >
-                        Check Permissions Again
-                      </Button>
+                      <div className="flex gap-2 mt-3">
+                        <Button 
+                          onClick={checkBrowserSupport} 
+                          variant="outline" 
+                          size="sm"
+                        >
+                          Check Permissions Again
+                        </Button>
+                        <Button 
+                          onClick={() => window.location.reload()} 
+                          variant="outline" 
+                          size="sm"
+                        >
+                          Refresh Page
+                        </Button>
+                      </div>
+                      <div className="mt-2 p-2 bg-muted rounded text-xs">
+                        <p className="font-medium">Debug Info:</p>
+                        <p>Check browser console (F12) for detailed error messages</p>
+                      </div>
                     </div>
                   </AlertDescription>
                 </Alert>
@@ -479,7 +552,20 @@ ${response.aiAnalysis ? `- AI Feedback: ${response.aiAnalysis.feedback}` : ''}
                 <Alert className="mt-4">
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    Checking browser compatibility and permissions...
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      Checking browser compatibility and permissions...
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {isPermissionGranted === true && (
+                <Alert className="mt-4 border-green-200 bg-green-50">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    <p className="font-medium">Ready to start!</p>
+                    <p className="text-sm">Camera and microphone permissions granted successfully.</p>
                   </AlertDescription>
                 </Alert>
               )}
