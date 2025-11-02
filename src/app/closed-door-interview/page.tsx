@@ -17,7 +17,12 @@ import {
   AlertTriangle,
   CheckCircle,
   Loader2,
+  Mic,
+  AlertCircle,
+  Info,
+  ArrowRight
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getRandomInterviewer, AIInterviewer } from '@/lib/ai-interviewers';
 import { PanelInterviewSession } from '@/lib/panel-interview-manager';
 import { 
@@ -27,14 +32,20 @@ import {
 } from '@/components/lazy';
 import InterviewErrorBoundary from '@/components/closed-door-interview/interview-error-boundary';
 import ErrorBoundary from '@/components/error-boundary';
+import MockClosedDoorInterview from '@/components/mock-closed-door-interview';
 
-type InterviewPhase = 'setup' | 'interviewer-selection' | 'interview' | 'results';
+export type InterviewPhase = 'setup' | 'interviewer-selection' | 'interview' | 'results';
 
-interface InterviewSession {
+// Re-export AIInterviewer for components
+export type { AIInterviewer } from '@/lib/ai-interviewers';
+
+export interface InterviewSession {
   id: string;
-  interviewer: AIInterviewer;
-  startTime: Date;
-  endTime?: Date;
+  interviewerId: string;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  phase: string;
   questions: string[];
   responses: string[];
   performanceMetrics: {
@@ -49,6 +60,8 @@ interface InterviewSession {
     improvements: string[];
     recommendations: string[];
   };
+  overallScore: number;
+  isCompleted: boolean;
 }
 
 export default function ClosedDoorInterviewPage() {
@@ -57,11 +70,112 @@ export default function ClosedDoorInterviewPage() {
   const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPermissionGranted, setIsPermissionGranted] = useState<boolean | null>(null);
 
-  // Preload interview components on mount
+  // Check browser compatibility and permissions
   useEffect(() => {
+    checkBrowserSupport();
     preloadInterviewComponents();
   }, []);
+
+  const checkBrowserSupport = async () => {
+    console.log('🔍 Starting browser support check for closed door interview...');
+    setIsPermissionGranted(null); // Set to loading state
+    
+    try {
+      // Check for required APIs
+      const hasMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+      const hasSpeechRecognition = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+      
+      console.log('📱 MediaDevices API supported:', hasMediaDevices);
+      console.log('🎤 Speech Recognition supported:', hasSpeechRecognition);
+      
+      if (!hasMediaDevices) {
+        console.error('❌ MediaDevices API not supported');
+        setIsPermissionGranted(false);
+        return;
+      }
+      
+      // Check if we're in a secure context (required for getUserMedia)
+      if (!window.isSecureContext) {
+        console.error('❌ Not in secure context (HTTPS required for camera/microphone)');
+        setIsPermissionGranted(false);
+        return;
+      }
+
+      // Test permissions with fallback handling
+      try {
+        console.log('🔐 Requesting camera and microphone permissions...');
+        
+        // First try with both video and audio
+        let stream: MediaStream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 }
+            }, 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            }
+          });
+        } catch (videoError) {
+          console.warn('⚠️ Video + Audio failed, trying audio only:', videoError);
+          // Fallback to audio only
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            }
+          });
+        }
+        
+        console.log('✅ Stream obtained successfully');
+        console.log('📹 Video tracks:', stream.getVideoTracks().length);
+        console.log('🎵 Audio tracks:', stream.getAudioTracks().length);
+        
+        // Validate that we have at least audio
+        if (stream.getAudioTracks().length === 0) {
+          throw new Error('No audio tracks available');
+        }
+        
+        // Clean up
+        stream.getTracks().forEach(track => {
+          track.stop();
+          console.log('🛑 Stopped track:', track.label);
+        });
+        
+        console.log('🎉 Camera and microphone permissions granted successfully!');
+        setIsPermissionGranted(true);
+        
+      } catch (error: any) {
+        console.error('❌ Permission error details:');
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        
+        // More specific error handling
+        if (error.name === 'NotAllowedError') {
+          console.error('🚫 User denied permission or permissions were revoked');
+        } else if (error.name === 'NotFoundError') {
+          console.error('📷 No camera or microphone found');
+        } else if (error.name === 'NotReadableError') {
+          console.error('🔒 Device is already in use by another application');
+        } else if (error.name === 'OverconstrainedError') {
+          console.error('⚙️ Constraints cannot be satisfied');
+        } else if (error.name === 'SecurityError') {
+          console.error('🔐 Security error - likely HTTPS required or permissions policy blocked');
+        }
+        
+        setIsPermissionGranted(false);
+      }
+    } catch (error) {
+      console.error('💥 Browser support check failed:', error);
+      setIsPermissionGranted(false);
+    }
+  };
 
   // Memoize handlers to prevent unnecessary re-renders
   const handleInterviewerSelected = useCallback(async (interviewer: AIInterviewer) => {
@@ -77,8 +191,11 @@ export default function ClosedDoorInterviewPage() {
     // Create new interview session
     const session: InterviewSession = {
       id: `interview-${Date.now()}`,
-      interviewer,
-      startTime: new Date(),
+      interviewerId: interviewer.id,
+      startTime: Date.now(),
+      endTime: 0,
+      duration: 0,
+      phase: 'interview',
       questions: [],
       responses: [],
       performanceMetrics: {
@@ -93,6 +210,8 @@ export default function ClosedDoorInterviewPage() {
         improvements: [],
         recommendations: [],
       },
+      overallScore: 0,
+      isCompleted: false,
     };
     
     setInterviewSession(session);
@@ -111,21 +230,16 @@ export default function ClosedDoorInterviewPage() {
     await handleInterviewerSelected(randomInterviewer);
   }, [handleInterviewerSelected]);
 
-  const handleInterviewComplete = useCallback(async (sessionData: PanelInterviewSession) => {
+  const handleInterviewComplete = useCallback(async (sessionData: InterviewSession) => {
     setIsTransitioning(true);
     setIsLoading(true);
     
     if (interviewSession) {
-      // Convert PanelInterviewSession to InterviewSession format
+      // Update the session with completed data
       const updatedSession: InterviewSession = {
         ...interviewSession,
-        endTime: new Date(),
-        // Convert timestamp to Date if needed
-        startTime: sessionData.startTime ? new Date(sessionData.startTime) : interviewSession.startTime,
-        // Map panel interview data to our session format
-        questions: sessionData.questions.map(q => q.text),
-        responses: sessionData.responses.map(r => r.response),
-        // You can add more mapping here as needed
+        ...sessionData,
+        endTime: Date.now(),
       };
       setInterviewSession(updatedSession);
     }
@@ -258,13 +372,124 @@ export default function ClosedDoorInterviewPage() {
           </CardContent>
         </Card>
 
+        {/* Permission Status */}
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle className="text-lg">System Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                {isPermissionGranted === null ? (
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                ) : isPermissionGranted ? (
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                )}
+                <span className="text-sm">
+                  Camera & Microphone Access
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-sm">Speech Recognition Support</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-sm">AI Analysis Ready</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Permission Warnings/Info */}
+        {isPermissionGranted === false && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="space-y-2">
+                <p className="font-medium">Camera and microphone access required</p>
+                <p className="text-sm text-muted-foreground">
+                  To start the closed door interview, please:
+                </p>
+                <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
+                  <li>Click the camera/microphone icon in your browser's address bar</li>
+                  <li>Select "Allow" for both camera and microphone permissions</li>
+                  <li>Refresh the page if needed</li>
+                </ol>
+                
+                {/* Production-specific troubleshooting */}
+                {typeof window !== 'undefined' && window.location.protocol !== 'https:' && (
+                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                    <p className="text-yellow-800 text-xs">
+                      ⚠️ <strong>HTTPS Required:</strong> Camera and microphone access requires a secure connection (HTTPS). 
+                      This site must be accessed via HTTPS for the interview simulator to work.
+                    </p>
+                  </div>
+                )}
+                
+                {typeof window !== 'undefined' && !window.isSecureContext && (
+                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                    <p className="text-yellow-800 text-xs">
+                      ⚠️ <strong>Secure Context Required:</strong> This page is not in a secure context. 
+                      Please ensure you're accessing the site via HTTPS.
+                    </p>
+                  </div>
+                )}
+                
+                <div className="flex gap-2 mt-3">
+                  <Button 
+                    onClick={checkBrowserSupport} 
+                    variant="outline" 
+                    size="sm"
+                  >
+                    Check Permissions Again
+                  </Button>
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    variant="outline" 
+                    size="sm"
+                  >
+                    Refresh Page
+                  </Button>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isPermissionGranted === null && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                Checking browser compatibility and permissions...
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {isPermissionGranted === true && (
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <p className="font-medium">Ready to start!</p>
+              <p className="text-sm">Camera and microphone permissions granted successfully.</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Start Button */}
         <div className="flex justify-center pt-4">
           <Button 
             size="lg" 
             onClick={startInterviewerSelection}
             className="w-full sm:w-auto px-8 py-3 text-base sm:text-lg"
-            disabled={isLoading || isTransitioning}
+            disabled={isLoading || isTransitioning || isPermissionGranted === false}
           >
             {isLoading || isTransitioning ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -272,6 +497,7 @@ export default function ClosedDoorInterviewPage() {
               <Play className="mr-2 h-5 w-5" />
             )}
             {isLoading || isTransitioning ? 'Loading...' : 'Start Interview Simulation'}
+            <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
       </div>
@@ -288,19 +514,25 @@ export default function ClosedDoorInterviewPage() {
     </div>
   ), [handleInterviewerSelected, handleRandomSelection]);
 
-  const renderInterview = useMemo(() => (
-    <div className="max-w-6xl mx-auto">
-      <LazyClosedDoorSimulator
-        onComplete={handleInterviewComplete}
-      />
-    </div>
-  ), [handleInterviewComplete]);
+  const renderInterview = useMemo(() => {
+    if (!selectedInterviewer) return null;
+    
+    return (
+      <div className="max-w-6xl mx-auto">
+        <MockClosedDoorInterview
+          selectedInterviewer={selectedInterviewer}
+          onComplete={handleInterviewComplete}
+        />
+      </div>
+    );
+  }, [selectedInterviewer, handleInterviewComplete]);
 
   const renderResults = useMemo(() => {
     if (!interviewSession) return null;
 
-    const { performanceMetrics, feedback, interviewer, startTime, endTime } = interviewSession;
-    const duration = endTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000 / 60) : 0;
+    const { performanceMetrics, feedback, interviewerId, duration } = interviewSession;
+    const durationMinutes = Math.round(duration / 1000 / 60);
+    const interviewer = selectedInterviewer;
 
     return (
       <div className="max-w-4xl mx-auto space-y-8">
@@ -313,7 +545,7 @@ export default function ClosedDoorInterviewPage() {
           </div>
           <h1 className="text-3xl font-bold">Interview Complete!</h1>
           <p className="text-muted-foreground">
-            You completed a {duration}-minute interview with {interviewer.name}
+            You completed a {durationMinutes}-minute interview with {interviewer?.name || 'AI Interviewer'}
           </p>
         </div>
 
@@ -446,7 +678,7 @@ export default function ClosedDoorInterviewPage() {
         </div>
       </div>
     );
-  }, [interviewSession, resetInterview, isLoading]);
+  }, [interviewSession, resetInterview, isLoading, isTransitioning, selectedInterviewer]);
 
   return (
     <ErrorBoundary>

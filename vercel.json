@@ -47,7 +47,7 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
+          "value": "camera=(self), microphone=(self), geolocation=()"
         }
       ]
     },
@@ -74,6 +74,20 @@
     "NODE_ENV": "production"
   },
   "regions": ["iad1"],
+  "functions": {
+    "app/api/**/*.js": {
+      "maxDuration": 30
+    },
+    "src/app/api/**/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cleanup",
+      "schedule": "0 2 * * *"
+    }
+  ],
   "cleanUrls": true,
   "trailingSlash": false
 }

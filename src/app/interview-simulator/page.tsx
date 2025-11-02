@@ -182,23 +182,44 @@ export default function InterviewSimulatorPage() {
         console.warn('⚠️ Speech Recognition not supported, but continuing with video/audio only');
       }
 
-      // Test permissions with more detailed logging
+      // Test permissions with more detailed logging and better error handling
       try {
         console.log('🔐 Requesting camera and microphone permissions...');
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }, 
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true
-          }
-        });
+        
+        // First try with both video and audio
+        let stream: MediaStream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 }
+            }, 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            }
+          });
+        } catch (videoError) {
+          console.warn('⚠️ Video + Audio failed, trying audio only:', videoError);
+          // Fallback to audio only
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            }
+          });
+        }
         
         console.log('✅ Stream obtained successfully');
         console.log('📹 Video tracks:', stream.getVideoTracks().length);
         console.log('🎵 Audio tracks:', stream.getAudioTracks().length);
+        
+        // Validate that we have at least audio
+        if (stream.getAudioTracks().length === 0) {
+          throw new Error('No audio tracks available');
+        }
         
         // Check track states
         stream.getVideoTracks().forEach((track, index) => {

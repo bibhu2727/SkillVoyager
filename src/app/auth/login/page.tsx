@@ -161,7 +161,7 @@ export default function LoginPage() {
           </Form>
           
           <div className="mt-6 text-center text-sm">
-            <div className="text-gray-800 dark:text-gray-300">Don't have an account? </div>
+            <div className="text-gray-800 dark:text-gray-300">Don&apos;t have an account? </div>
             <Link
               href="/auth/signup"
               className="font-medium text-primary hover:underline"

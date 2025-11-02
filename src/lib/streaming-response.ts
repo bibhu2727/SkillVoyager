@@ -144,14 +144,13 @@ class StreamingResponseManager {
    */
   createSSEStream(response: any, cached: boolean = false): ReadableStream<Uint8Array> {
     const encoder = new TextEncoder();
-    const streamManager = this;
 
     return new ReadableStream({
-      async start(controller) {
+      start: async (controller) => {
         try {
           const generator = cached 
-            ? streamManager.streamCachedResponse(response)
-            : streamManager.streamResponse(response);
+            ? this.streamCachedResponse(response)
+            : this.streamResponse(response);
 
           for await (const chunk of generator) {
             const data = `data: ${JSON.stringify(chunk)}\n\n`;

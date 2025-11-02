@@ -136,7 +136,7 @@ export const validateConfig = () => {
   return true;
 };
 
-// Initialize configuration validation in production
+// Initialize configuration validation in production only
 if (isProduction) {
   try {
     validateConfig();
@@ -145,4 +145,6 @@ if (isProduction) {
     console.error('❌ Configuration validation failed:', error);
     process.exit(1);
   }
+} else {
+  console.log('🔧 Development mode: Skipping configuration validation');
 }
