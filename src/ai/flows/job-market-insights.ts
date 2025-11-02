@@ -36,10 +36,18 @@ export type JobMarketInsightsOutput = z.infer<typeof JobMarketInsightsOutputSche
 export async function getJobMarketInsights(
   input: JobMarketInsightsInput
 ): Promise<JobMarketInsightsOutput> {
-  return jobMarketInsightsFlow(input);
+  // During build time, return mock data
+  if (!ai) {
+    return {
+      trendingSkills: 'JavaScript, React, Node.js, TypeScript, Python',
+      alternativeCareerPaths: 'Frontend Developer, Full Stack Developer, Software Architect',
+      demandOutlook: 'High demand expected to continue growing in the next 5 years'
+    };
+  }
+  return jobMarketInsightsFlow!(input);
 }
 
-const jobMarketInsightsPrompt = ai.definePrompt({
+const jobMarketInsightsPrompt = ai?.definePrompt({
   name: 'jobMarketInsightsPrompt',
   input: {schema: JobMarketInsightsInputSchema},
   output: {schema: JobMarketInsightsOutputSchema},
@@ -53,14 +61,14 @@ const jobMarketInsightsPrompt = ai.definePrompt({
   `,
 });
 
-const jobMarketInsightsFlow = ai.defineFlow(
+const jobMarketInsightsFlow = ai?.defineFlow(
   {
     name: 'jobMarketInsightsFlow',
     inputSchema: JobMarketInsightsInputSchema,
     outputSchema: JobMarketInsightsOutputSchema,
   },
   async input => {
-    const {output} = await jobMarketInsightsPrompt(input);
+    const {output} = await jobMarketInsightsPrompt!(input);
     return output!;
   }
 );

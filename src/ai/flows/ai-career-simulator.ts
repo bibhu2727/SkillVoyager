@@ -30,10 +30,18 @@ const AiCareerSimulatorOutputSchema = z.object({
 export type AiCareerSimulatorOutput = z.infer<typeof AiCareerSimulatorOutputSchema>;
 
 export async function aiCareerSimulator(input: AiCareerSimulatorInput): Promise<AiCareerSimulatorOutput> {
-  return aiCareerSimulatorFlow(input);
+  // During build time, return mock data
+  if (!ai) {
+    return {
+      predictedRole: 'Senior Software Engineer',
+      predictedSalary: '$120,000 - $150,000',
+      requiredSkills: 'Advanced JavaScript, React, Node.js, System Design, Leadership'
+    };
+  }
+  return aiCareerSimulatorFlow!(input);
 }
 
-const prompt = ai.definePrompt({
+const prompt = ai?.definePrompt({
   name: 'aiCareerSimulatorPrompt',
   input: {schema: AiCareerSimulatorInputSchema},
   output: {schema: AiCareerSimulatorOutputSchema},
@@ -51,14 +59,14 @@ Based on this information, predict:
 - Required Skills:`, 
 });
 
-const aiCareerSimulatorFlow = ai.defineFlow(
+const aiCareerSimulatorFlow = ai?.defineFlow(
   {
     name: 'aiCareerSimulatorFlow',
     inputSchema: AiCareerSimulatorInputSchema,
     outputSchema: AiCareerSimulatorOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
 );

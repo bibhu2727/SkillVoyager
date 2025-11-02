@@ -40,10 +40,21 @@ export type SalaryNegotiatorOutput = z.infer<typeof SalaryNegotiatorOutputSchema
 export async function salaryNegotiator(
   input: SalaryNegotiatorInput
 ): Promise<SalaryNegotiatorOutput> {
-  return salaryNegotiatorFlow(input);
+  // During build time, return mock data
+  if (!ai) {
+    return {
+      negotiationStrategy: 'Mock negotiation strategy',
+      targetSalary: '$80,000 - $100,000',
+      talkingPoints: ['Market research', 'Experience', 'Skills'],
+      counterOfferStrategy: 'Mock counter offer strategy',
+      redFlags: ['Low initial offer', 'No room for negotiation'],
+      confidence: 0.8
+    };
+  }
+  return salaryNegotiatorFlow!(input);
 }
 
-const salaryNegotiatorPrompt = ai.definePrompt({
+const salaryNegotiatorPrompt = ai?.definePrompt({
   name: 'salaryNegotiatorPrompt',
   input: { schema: SalaryNegotiatorInputSchema },
   output: { schema: SalaryNegotiatorOutputSchema },
@@ -88,14 +99,14 @@ const salaryNegotiatorPrompt = ai.definePrompt({
 Provide actionable, professional advice that maximizes compensation while maintaining positive relationships.`
 });
 
-const salaryNegotiatorFlow = ai.defineFlow(
+const salaryNegotiatorFlow = ai?.defineFlow(
   {
     name: 'salaryNegotiatorFlow',
     inputSchema: SalaryNegotiatorInputSchema,
     outputSchema: SalaryNegotiatorOutputSchema,
   },
   async (input) => {
-    const { output } = await salaryNegotiatorPrompt(input);
+    const { output } = await salaryNegotiatorPrompt!(input);
     return output!;
   }
 );

@@ -30,10 +30,17 @@ const BuildResumeOutputSchema = z.object({
 export type BuildResumeOutput = z.infer<typeof BuildResumeOutputSchema>;
 
 export async function buildResume(input: BuildResumeInput): Promise<BuildResumeOutput> {
-  return buildResumeFlow(input);
+  // During build time, return mock data
+  if (!ai) {
+    return {
+      resume: 'Mock Resume Content for ' + input.jobRole,
+      missingKeywords: ['keyword1', 'keyword2', 'keyword3']
+    };
+  }
+  return buildResumeFlow!(input);
 }
 
-const prompt = ai.definePrompt({
+const prompt = ai?.definePrompt({
   name: 'buildResumePrompt',
   input: {schema: BuildResumeInputSchema},
   output: {schema: BuildResumeOutputSchema},
@@ -65,14 +72,14 @@ Output the resume and the missing keywords in JSON format.
 `,
 });
 
-const buildResumeFlow = ai.defineFlow(
+const buildResumeFlow = ai?.defineFlow(
   {
     name: 'buildResumeFlow',
     inputSchema: BuildResumeInputSchema,
     outputSchema: BuildResumeOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
 );

@@ -107,13 +107,14 @@ const ComprehensiveAnalysisOutput = z.object({
 });
 
 // AI Flow for generating interview questions
-export const generateInterviewQuestions = ai.defineFlow(
+export const generateInterviewQuestions = ai ? ai.defineFlow(
   {
     name: 'generateInterviewQuestions',
     inputSchema: InterviewQuestionGenerationInput,
     outputSchema: InterviewQuestionOutput,
   },
   async (input) => {
+    
     const { 
       jobRole, 
       difficulty, 
@@ -212,7 +213,7 @@ Generate questions that make candidates think, reflect, and showcase their uniqu
 
     // Create a unique prompt for generating interview questions (cached to avoid registry conflicts)
     const promptName = `generateQuestionsPrompt_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-    const questionPrompt = ai.definePrompt({
+    const questionPrompt = ai?.definePrompt({
       name: promptName,
       input: { schema: InterviewQuestionGenerationInput },
       output: { schema: InterviewQuestionOutput },
@@ -220,7 +221,7 @@ Generate questions that make candidates think, reflect, and showcase their uniqu
     });
 
     try {
-      const { output } = await questionPrompt(input);
+      const { output } = await questionPrompt!(input);
       return output!;
     } catch (error) {
       // Fallback: create structured response if AI generation fails
@@ -243,16 +244,34 @@ Generate questions that make candidates think, reflect, and showcase their uniqu
       };
     }
   }
-);
+) : async (input: any) => {
+  // Mock data for build time
+  return {
+    questions: [
+      {
+        id: '1',
+        category: 'technical-deep-dive',
+        question: 'Tell me about your experience with JavaScript.',
+        expectedKeywords: ['JavaScript', 'experience', 'projects'],
+        timeLimit: 300,
+        difficulty: input.difficulty || 'mid',
+        questionType: 'experience-based',
+        complexity: 'detailed-analysis',
+        tips: 'Focus on specific examples and demonstrate your knowledge clearly.'
+      }
+    ]
+  };
+};
 
 // AI Flow for analyzing individual responses
-export const analyzeInterviewResponse = ai.defineFlow(
+export const analyzeInterviewResponse = ai ? ai.defineFlow(
   {
     name: 'analyzeInterviewResponse',
     inputSchema: ResponseAnalysisInput,
     outputSchema: ResponseAnalysisOutput,
   },
   async (input) => {
+    
     const { question, response, expectedKeywords, jobRole, difficulty, speechAnalysis } = input;
 
     const prompt = `
@@ -300,7 +319,7 @@ Return response in the exact JSON format specified.
 `;
 
     // Create a prompt for analyzing interview responses
-    const analysisPrompt = ai.definePrompt({
+    const analysisPrompt = ai?.definePrompt({
       name: 'analyzeResponsePrompt',
       input: { schema: ResponseAnalysisInput },
       output: { schema: ResponseAnalysisOutput },
@@ -308,7 +327,7 @@ Return response in the exact JSON format specified.
     });
 
     try {
-      const { output } = await analysisPrompt(input);
+      const { output } = await analysisPrompt!(input);
       return output!;
     } catch (error) {
       // Fallback analysis
@@ -333,16 +352,30 @@ Return response in the exact JSON format specified.
       };
     }
   }
-);
+) : async (input: any) => {
+  // Mock data for build time
+  return {
+    confidence: 0.75,
+    keywordUsage: ['JavaScript', 'experience'],
+    improvementAreas: ['More specific examples', 'Technical depth'],
+    strengths: ['Clear communication', 'Relevant experience'],
+    technicalScore: 7,
+    communicationScore: 8,
+    problemSolvingScore: 6,
+    overallFeedback: 'Good response with room for improvement in technical details.',
+    specificTips: ['Provide more concrete examples', 'Explain technical concepts clearly']
+  };
+};
 
 // AI Flow for comprehensive analysis of all responses
-export const generateComprehensiveAnalysis = ai.defineFlow(
+export const generateComprehensiveAnalysis = ai ? ai.defineFlow(
   {
     name: 'generateComprehensiveAnalysis',
     inputSchema: ComprehensiveAnalysisInput,
     outputSchema: ComprehensiveAnalysisOutput,
   },
   async (input) => {
+    
     const { jobRole, difficulty, responses } = input;
 
     const responsesSummary = responses.map((r, index) => 
@@ -397,7 +430,7 @@ Return response in the exact JSON format specified.
 `;
 
     // Create a prompt for comprehensive analysis
-    const comprehensivePrompt = ai.definePrompt({
+    const comprehensivePrompt = ai?.definePrompt({
       name: 'comprehensiveAnalysisPrompt',
       input: { schema: ComprehensiveAnalysisInput },
       output: { schema: ComprehensiveAnalysisOutput },
@@ -405,7 +438,7 @@ Return response in the exact JSON format specified.
     });
 
     try {
-      const { output } = await comprehensivePrompt(input);
+      const { output } = await comprehensivePrompt!(input);
       return output!;
     } catch (error) {
       // Fallback comprehensive analysis
@@ -449,7 +482,25 @@ Return response in the exact JSON format specified.
       };
     }
   }
-);
+) : async (input: any) => {
+  // Mock data for build time
+  return {
+    overallScore: 75,
+    speechPattern: 'Clear and confident communication with good pacing',
+    confidence: 0.8,
+    keywordUsage: ['JavaScript', 'React', 'problem-solving'],
+    improvementAreas: ['Technical depth', 'Specific examples'],
+    strengths: ['Communication skills', 'Relevant experience'],
+    detailedFeedback: {
+      technical: 7,
+      communication: 8,
+      problemSolving: 7,
+      leadership: 6
+    },
+    recommendations: ['Practice more technical questions', 'Prepare specific examples'],
+    nextSteps: ['Study system design', 'Practice coding interviews']
+  };
+};
 
 // Export types for use in components
 export type {

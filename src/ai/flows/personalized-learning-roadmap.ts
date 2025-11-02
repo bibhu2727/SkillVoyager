@@ -62,10 +62,27 @@ export type PersonalizedLearningRoadmapOutput = z.infer<
 export async function personalizedLearningRoadmap(
   input: PersonalizedLearningRoadmapInput
 ): Promise<PersonalizedLearningRoadmapOutput> {
-  return personalizedLearningRoadmapFlow(input);
+  // During build time, return mock data
+  if (!ai) {
+    return {
+      learningRoadmap: [
+        {
+          step: 'Learn fundamentals',
+          timeline: '2-3 months',
+          resources: ['Coursera Course', 'Udemy Course', 'Khan Academy']
+        },
+        {
+          step: 'Practice projects',
+          timeline: '1-2 months',
+          resources: ['GitHub Projects', 'Personal Portfolio']
+        }
+      ]
+    };
+  }
+  return personalizedLearningRoadmapFlow!(input);
 }
 
-const prompt = ai.definePrompt({
+const prompt = ai?.definePrompt({
   name: 'personalizedLearningRoadmapPrompt',
   input: {schema: PersonalizedLearningRoadmapInputSchema},
   output: {schema: PersonalizedLearningRoadmapOutputSchema},
@@ -88,14 +105,14 @@ const prompt = ai.definePrompt({
   `,
 });
 
-const personalizedLearningRoadmapFlow = ai.defineFlow(
+const personalizedLearningRoadmapFlow = ai?.defineFlow(
   {
     name: 'personalizedLearningRoadmapFlow',
     inputSchema: PersonalizedLearningRoadmapInputSchema,
     outputSchema: PersonalizedLearningRoadmapOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
 );

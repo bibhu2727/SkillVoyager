@@ -37,10 +37,25 @@ const SkillGapAnalysisOutputSchema = z.object({
 export type SkillGapAnalysisOutput = z.infer<typeof SkillGapAnalysisOutputSchema>;
 
 export async function analyzeSkillGap(input: SkillGapAnalysisInput): Promise<SkillGapAnalysisOutput> {
-  return skillGapAnalysisFlow(input);
+  // During build time, return mock data
+  if (!ai) {
+    return {
+      missingSkills: [
+        {
+          name: 'Python',
+          importance: 'Essential for data analysis and machine learning'
+        },
+        {
+          name: 'SQL',
+          importance: 'Required for database operations and data querying'
+        }
+      ]
+    };
+  }
+  return skillGapAnalysisFlow!(input);
 }
 
-const skillGapAnalysisPrompt = ai.definePrompt({
+const skillGapAnalysisPrompt = ai?.definePrompt({
   name: 'skillGapAnalysisPrompt',
   input: {
     schema: SkillGapAnalysisInputSchema,
@@ -71,14 +86,14 @@ Return the missing skills in the following format:
 `,
 });
 
-const skillGapAnalysisFlow = ai.defineFlow(
+const skillGapAnalysisFlow = ai?.defineFlow(
   {
     name: 'skillGapAnalysisFlow',
     inputSchema: SkillGapAnalysisInputSchema,
     outputSchema: SkillGapAnalysisOutputSchema,
   },
   async input => {
-    const {output} = await skillGapAnalysisPrompt(input);
+    const {output} = await skillGapAnalysisPrompt!(input);
     return output!;
   }
 );

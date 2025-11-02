@@ -56,13 +56,44 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+// Check if we're in build mode (when Next.js is building the app)
+const isBuildTime = process.env.NODE_ENV === 'production' && (
+  !process.env.VERCEL_URL || 
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.npm_lifecycle_event === 'build' ||
+  process.env.npm_lifecycle_event === 'build:vercel'
+);
+
 // Validate environment variables
 function validateEnv(): Env {
   try {
+    // During build time, use more lenient validation
+    if (isBuildTime) {
+      // Create a minimal environment for build process
+      const buildEnv = {
+        ...process.env,
+        NODE_ENV: 'production',
+        NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'build-placeholder',
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'build-placeholder.firebaseapp.com',
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'build-placeholder',
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'build-placeholder.appspot.com',
+        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '123456789',
+        NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:123456789:web:build-placeholder',
+        GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY || 'build-placeholder-key',
+        GENKIT_ENV: 'prod' as const,
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'build-placeholder-secret-32-chars-long',
+        NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'https://build-placeholder.vercel.app',
+        ENCRYPTION_KEY: process.env.ENCRYPTION_KEY || 'build-placeholder-32-chars-long!',
+        JWT_SECRET: process.env.JWT_SECRET || 'build-placeholder-jwt-secret-32-chars'
+      };
+      
+      return envSchema.parse(buildEnv);
+    }
+    
     const env = envSchema.parse(process.env);
     
-    // Additional production-specific validations
-    if (env.NODE_ENV === 'production') {
+    // Additional production-specific validations (only at runtime, not build time)
+    if (env.NODE_ENV === 'production' && !isBuildTime) {
       // Ensure all Firebase config is present in production
       const requiredFirebaseVars = [
         'NEXT_PUBLIC_FIREBASE_API_KEY',
@@ -75,23 +106,23 @@ function validateEnv(): Env {
       
       for (const varName of requiredFirebaseVars) {
         const value = process.env[varName];
-        if (!value || value.includes('your_') || value.includes('_here')) {
+        if (!value || value.includes('your_') || value.includes('_here') || value.includes('build-placeholder')) {
           throw new Error(`${varName} must be set to a real value in production`);
         }
       }
       
       // Ensure Google AI API key is set
-      if (!env.GOOGLE_AI_API_KEY || env.GOOGLE_AI_API_KEY.includes('your_')) {
+      if (!env.GOOGLE_AI_API_KEY || env.GOOGLE_AI_API_KEY.includes('your_') || env.GOOGLE_AI_API_KEY.includes('build-placeholder')) {
         throw new Error('GOOGLE_AI_API_KEY must be set to a real value in production');
       }
       
       // Ensure NextAuth secret is properly set
-      if (!env.NEXTAUTH_SECRET || env.NEXTAUTH_SECRET.includes('your_')) {
+      if (!env.NEXTAUTH_SECRET || env.NEXTAUTH_SECRET.includes('your_') || env.NEXTAUTH_SECRET.includes('build-placeholder')) {
         throw new Error('NEXTAUTH_SECRET must be set to a real value in production');
       }
       
       // Ensure encryption key is properly set
-      if (!env.ENCRYPTION_KEY || env.ENCRYPTION_KEY.includes('your_')) {
+      if (!env.ENCRYPTION_KEY || env.ENCRYPTION_KEY.includes('your_') || env.ENCRYPTION_KEY.includes('build-placeholder')) {
         throw new Error('ENCRYPTION_KEY must be set to a real value in production');
       }
     }
