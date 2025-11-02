@@ -18,6 +18,8 @@ import {
   Award,
   Calendar,
   MessageCircle,
+  DollarSign,
+  Video,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -43,9 +45,11 @@ const menuItems = [
   { href: '/roadmap', label: 'Roadmap', icon: GitCommit },
   { href: '/resume', label: 'Resume', icon: FileText },
   { href: '/interview-simulator', label: 'Interview Simulator', icon: Rocket },
+  { href: '/closed-door-interview', label: 'Closed Door Interview', icon: Video },
   { href: '/quiz', label: 'Skill Quiz', icon: Trophy },
   { href: '/games', label: 'Career Games', icon: Bot },
   { href: '/careerguru', label: 'CareerGuru Chat', icon: MessageCircle },
+  { href: '/salary-negotiator', label: 'Salary Negotiator', icon: DollarSign },
   { href: '/insights', label: 'Insights', icon: Lightbulb },
   { href: '/skill-gap', label: 'Skill Gap', icon: Search },
 ];

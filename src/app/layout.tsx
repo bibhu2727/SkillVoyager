@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
+// Initialize environment configuration early
+import '@/lib/env';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/contexts/auth-context';
@@ -7,10 +9,46 @@ import { ThemeProvider } from '@/contexts/theme-context';
 import { CookieConsentWrapper } from '@/components/ui/cookie-consent-wrapper';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { config } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: 'SkillVoyager',
-  description: 'Your AI-powered career navigator',
+  title: 'SkillVoyager - AI-Powered Career Navigator',
+  description: 'Your AI-powered career navigator for interview preparation, skill development, and career growth',
+  keywords: ['career', 'interview', 'AI', 'skills', 'job preparation', 'professional development'],
+  authors: [{ name: 'SkillVoyager Team' }],
+  creator: 'SkillVoyager',
+  publisher: 'SkillVoyager',
+  metadataBase: new URL(config.baseUrl),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'SkillVoyager - AI-Powered Career Navigator',
+    description: 'Your AI-powered career navigator for interview preparation, skill development, and career growth',
+    url: config.baseUrl,
+    siteName: 'SkillVoyager',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SkillVoyager - AI-Powered Career Navigator',
+    description: 'Your AI-powered career navigator for interview preparation, skill development, and career growth',
+  },
+  robots: {
+    index: config.isProduction,
+    follow: config.isProduction,
+    googleBot: {
+      index: config.isProduction,
+      follow: config.isProduction,
+    },
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
@@ -33,8 +71,8 @@ export default function RootLayout({
             </AppLayout>
             <Toaster />
             <CookieConsentWrapper />
-            <Analytics />
-            <SpeedInsights />
+            {config.analytics.vercelAnalyticsId && <Analytics />}
+            {config.analytics.speedInsightsId && <SpeedInsights />}
           </AuthProvider>
         </ThemeProvider>
       </body>

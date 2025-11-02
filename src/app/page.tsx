@@ -23,12 +23,63 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
+import { useMemo } from 'react';
+
+// Function to calculate job readiness based on profile data
+const calculateJobReadiness = (currentSkills: any[], careerAspirations: string, experience: string) => {
+  let score = 0;
+  
+  // Base score from skills (40% of total)
+  if (currentSkills && currentSkills.length > 0) {
+    const skillScore = currentSkills.reduce((acc, skill) => {
+      switch (skill.proficiency) {
+        case 'Advanced': return acc + 15;
+        case 'Intermediate': return acc + 10;
+        case 'Beginner': return acc + 5;
+        default: return acc;
+      }
+    }, 0);
+    score += Math.min(skillScore, 40); // Cap at 40 points
+  }
+  
+  // Career clarity bonus (20% of total)
+  if (careerAspirations && careerAspirations.trim().length > 0) {
+    score += 20;
+  }
+  
+  // Experience bonus (30% of total)
+  if (experience && experience.trim().length > 0) {
+    const experienceLength = experience.trim().length;
+    if (experienceLength > 200) score += 30;
+    else if (experienceLength > 100) score += 20;
+    else if (experienceLength > 50) score += 15;
+    else score += 10;
+  }
+  
+  // Skill diversity bonus (10% of total)
+  if (currentSkills && currentSkills.length >= 5) {
+    score += 10;
+  } else if (currentSkills && currentSkills.length >= 3) {
+    score += 5;
+  }
+  
+  return Math.min(Math.max(score, 0), 100); // Ensure score is between 0-100
+};
 
 export default function DashboardPage() {
   const { user } = useAuth();
   
   // Use authenticated user's name, fallback to userProfile.name if not logged in
   const displayName = user?.name && user.name.trim() ? user.name : userProfile.name;
+  
+  // Calculate dynamic job readiness score
+  const jobReadinessScore = useMemo(() => {
+    const currentSkills = user?.currentSkills || userProfile.currentSkills;
+    const careerAspirations = user?.careerAspirations || userProfile.careerAspirations;
+    const experience = user?.experience || userProfile.experience;
+    
+    return calculateJobReadiness(currentSkills, careerAspirations, experience);
+  }, [user?.currentSkills, user?.careerAspirations, user?.experience]);
   
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -38,7 +89,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle>Skill Constellation</CardTitle>
             <CardDescription>
-              A visualization of your current skill proficiency.
+              Your skills mapped as a constellation - add more skills in your profile to expand your universe!
             </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
@@ -53,7 +104,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center p-6">
-            <ReadinessScore score={78} />
+            <ReadinessScore score={jobReadinessScore} />
           </CardContent>
         </Card>
       </div>

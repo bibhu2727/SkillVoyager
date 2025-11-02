@@ -13,7 +13,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
   // Define public routes that don't need sidebar
-  const publicRoutes = ['/auth/login', '/auth/signup'];
+  const publicRoutes = ['/auth/login', '/auth/signup', '/salary-negotiation'];
   const isPublicRoute = publicRoutes.includes(pathname);
   
   return (

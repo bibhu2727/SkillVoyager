@@ -89,6 +89,17 @@ export function ProfileForm({ userProfile }: { userProfile: UserProfile }) {
   });
 
   function onSubmit(data: ProfileFormValues) {
+    // Update the auth context with all profile data
+    updateProfile({
+      name: data.name,
+      careerAspirations: data.careerAspirations,
+      age: data.age,
+      educationLevel: data.educationLevel,
+      fieldOfInterest: data.fieldOfInterest,
+      experience: data.experience,
+      currentSkills: data.currentSkills,
+    });
+    
     toast({
       title: "Profile Updated!",
       description: "Your changes have been saved successfully.",

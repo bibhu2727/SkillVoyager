@@ -3,12 +3,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+export interface Skill {
+  name: string;
+  proficiency: "Beginner" | "Intermediate" | "Advanced";
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
   careerAspirations?: string;
+  age?: number;
+  educationLevel?: string;
+  fieldOfInterest?: string;
+  experience?: string;
+  currentSkills?: Skill[];
 }
 
 interface AuthContextType {

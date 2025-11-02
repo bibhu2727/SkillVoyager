@@ -36,6 +36,7 @@ import {
   generateComprehensiveAnalysis,
 } from '@/ai/flows/interview-simulator';
 
+
 type ActionResult<T> =
   | {
       success: true;
@@ -171,6 +172,23 @@ export async function generateComprehensiveAnalysisAction(
     return { success: true, data: output };
   } catch (error) {
     console.error('Error generating comprehensive analysis:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
+  }
+}
+
+
+
+export async function processCounterOfferAction(
+  input: any
+): Promise<ActionResult<any>> {
+  try {
+    const output = await processCounterOfferAction(input);
+    return { success: true, data: output };
+  } catch (error) {
+    console.error('Error processing counter offer:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',

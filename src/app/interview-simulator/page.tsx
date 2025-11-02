@@ -523,6 +523,26 @@ ${response.aiAnalysis ? `- AI Feedback: ${response.aiAnalysis.feedback}` : ''}
                         <li>Select "Allow" for both camera and microphone permissions</li>
                         <li>Refresh the page if needed</li>
                       </ol>
+                      
+                      {/* Production-specific troubleshooting */}
+                      {typeof window !== 'undefined' && window.location.protocol !== 'https:' && (
+                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                          <p className="text-yellow-800 text-xs">
+                            ⚠️ <strong>HTTPS Required:</strong> Camera and microphone access requires a secure connection (HTTPS). 
+                            This site must be accessed via HTTPS for the interview simulator to work.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {typeof window !== 'undefined' && !window.isSecureContext && (
+                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                          <p className="text-yellow-800 text-xs">
+                            ⚠️ <strong>Secure Context Required:</strong> This page is not in a secure context. 
+                            Please ensure you're accessing the site via HTTPS.
+                          </p>
+                        </div>
+                      )}
+                      
                       <div className="flex gap-2 mt-3">
                         <Button 
                           onClick={checkBrowserSupport} 
@@ -541,7 +561,14 @@ ${response.aiAnalysis ? `- AI Feedback: ${response.aiAnalysis.feedback}` : ''}
                       </div>
                       <div className="mt-2 p-2 bg-muted rounded text-xs">
                         <p className="font-medium">Debug Info:</p>
-                        <p>Check browser console (F12) for detailed error messages</p>
+                        <p>• Browser: {typeof navigator !== 'undefined' ? navigator.userAgent.split(' ').slice(-2).join(' ') : 'Unknown'}</p>
+                        <p>• HTTPS: {typeof window !== 'undefined' ? (window.location.protocol === 'https:' ? 'Yes' : 'No') : 'Unknown'}</p>
+                        <p>• Secure Context: {typeof window !== 'undefined' ? (window.isSecureContext ? 'Yes' : 'No') : 'Unknown'}</p>
+                        <p>• MediaDevices: {typeof navigator !== 'undefined' && navigator.mediaDevices ? 'Supported' : 'Not Supported'}</p>
+                        <p>• Speech Recognition: {typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) ? 'Supported' : 'Not Supported'}</p>
+                        <p>• Environment: {process.env.NODE_ENV || 'Unknown'}</p>
+                        <p>• URL: {typeof window !== 'undefined' ? window.location.href : 'Unknown'}</p>
+                        <p className="text-xs mt-1 text-muted-foreground">Check browser console (F12) for detailed error messages</p>
                       </div>
                     </div>
                   </AlertDescription>

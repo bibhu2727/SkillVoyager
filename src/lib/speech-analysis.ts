@@ -167,7 +167,33 @@ export class SpeechAnalyzer {
       };
 
       this.recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event);
+        console.error('Speech recognition error:', event.error);
+        
+        // Handle specific error types
+        if (event.error === 'network') {
+          console.warn('Network error in speech recognition. Retrying...');
+          // Retry after a short delay if still recording
+          setTimeout(() => {
+            if (this.recognition && this.isRecording) {
+              try {
+                this.recognition.start();
+              } catch (retryError) {
+                console.error('Failed to restart speech recognition:', retryError);
+              }
+            }
+          }, 2000);
+        } else if (event.error === 'no-speech') {
+          console.warn('No speech detected. Speech recognition will restart automatically.');
+        } else if (event.error === 'audio-capture') {
+          console.error('Audio capture error. Please check microphone permissions.');
+          this.isRecording = false;
+        } else if (event.error === 'not-allowed') {
+          console.error('Speech recognition not allowed. Please grant microphone permissions.');
+          this.isRecording = false;
+        } else if (event.error === 'service-not-allowed') {
+          console.error('Speech recognition service not allowed.');
+          this.isRecording = false;
+        }
       };
 
       // Start speech recognition

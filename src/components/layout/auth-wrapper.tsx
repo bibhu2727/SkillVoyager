@@ -14,7 +14,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   const router = useRouter();
 
   // Define public routes that don't require authentication
-  const publicRoutes = ['/auth/login', '/auth/signup'];
+  const publicRoutes = ['/auth/login', '/auth/signup', '/salary-negotiation'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   useEffect(() => {
